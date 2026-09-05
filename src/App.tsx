@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BOOKS, COMPOUNDS, COURSES, DISEASES, EVENTS, FOODS, HERBS, PRODUCTS } from "./data";
+import { BOOKS, COMPOUNDS, DISEASES, EVENTS, FOODS, HERBS, PRODUCTS } from "./data";
+import { FULL_COURSES } from "./courses";
 import { EXTRA_COMPOUNDS, EXTRA_DISEASES, EXTRA_FOODS, EXTRA_HERBS, LONG_ARTICLES } from "./dataExtra";
 import { BookmarkProvider, Ic, Shamseh, ToastProvider, fa, useMarks, useToast } from "./ui";
 import Home from "./views/Home";
@@ -37,7 +38,7 @@ function buildIndex(): SearchItem[] {
     ...[...DISEASES, ...EXTRA_DISEASES].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
     ...LONG_ARTICLES.map((a) => ({ id: a.id, title: a.title, sub: a.cat, view: "journal" as ViewId, kind: "مقاله" })),
     ...BOOKS.map((b) => ({ id: b.id, title: `«${b.title}»`, sub: b.author, view: "library" as ViewId, kind: "کتاب", q: b.title })),
-    ...COURSES.map((c) => ({ id: c.id, title: c.title, sub: `دورهٔ ${c.level}`, view: "academy" as ViewId, kind: "دوره" })),
+    ...FULL_COURSES.map((c) => ({ id: c.id, title: c.title, sub: `دورهٔ باز • ${fa(c.lessons.length)} درس • ${fa(c.hours)} ساعت`, view: "academy" as ViewId, kind: "دوره" })),
     ...PRODUCTS.map((p) => ({ id: p.id, title: p.name, sub: p.seller, view: "market" as ViewId, kind: "محصول" })),
     ...EVENTS.map((e) => ({ id: e.id, title: e.title, sub: e.date, view: "community" as ViewId, kind: "رویداد" })),
   ];

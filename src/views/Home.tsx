@@ -197,7 +197,7 @@ export default function Home({ go }: { go: Go }) {
     { title: "دانشنامهٔ جامع", desc: "گیاهان دارویی، مفردات غذایی، مرکبات و بیماری‌ها با شناسنامهٔ داوری‌شده", view: "encyclopedia", icon: <Ic.leaf className="w-7 h-7" />, big: true },
     { title: "مزاج‌سنج هوشمند", desc: "پرسشنامهٔ استاندارد دوازده‌پرسشی با الگوریتم تشخیص مزاج و توصیه‌های اختصاصی", view: "quiz", icon: <Ic.scale className="w-6 h-6" /> },
     { title: "مجلهٔ علمی", desc: "پژوهش‌ها، تدابیر فصول و گزارش‌های ویژه از کتب مرجع", view: "journal", icon: <Ic.scroll className="w-6 h-6" /> },
-    { title: "آکادمی آموزش", desc: "دوره‌های رایگان تا تخصصی، وبینار زنده و کارگاه عملی", view: "academy", icon: <Ic.cap className="w-6 h-6" />, wide: true },
+    { title: "آکادمی آموزش", desc: "دوره‌های باز و کاملاً رایگان با متن آموزشی درس‌به‌درس، وبینار زنده و کارگاه عملی", view: "academy", icon: <Ic.cap className="w-6 h-6" />, wide: true },
     { title: "کتابخانهٔ دیجیتال", desc: "کتب خطی، رساله‌ها و خط زمان تاریخ طب ایران", view: "library", icon: <Ic.book className="w-6 h-6" /> },
     { title: "بازارچهٔ سالم", desc: "محصولات گیاهی استاندارد از فروشندگان اعتبارسنجی‌شده", view: "market", icon: <Ic.cart className="w-6 h-6" /> },
     { title: "انجمن تخصصی", desc: "تالار گفت‌وگو، پرسش از متخصص و رویدادها", view: "community", icon: <Ic.chat className="w-6 h-6" /> },
