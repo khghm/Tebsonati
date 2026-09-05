@@ -7,16 +7,36 @@ import {
   TEMPERAMENTS,
 } from "../data";
 import type { Compound, Disease, Food, Herb, TemperamentId } from "../data";
+import { EXTRA_COMPOUNDS, EXTRA_DISEASES, EXTRA_FOODS, EXTRA_HERBS, FOOD_DETAILS, HERB_DETAILS, MIZAJ_GUIDE } from "../dataExtra";
 import { Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
 
-type Tab = "herbs" | "foods" | "compounds" | "diseases";
+const ALL_HERBS = [...HERBS, ...EXTRA_HERBS];
+const ALL_FOODS = [...FOODS, ...EXTRA_FOODS];
+const ALL_COMPOUNDS = [...COMPOUNDS, ...EXTRA_COMPOUNDS];
+const ALL_DISEASES = [...DISEASES, ...EXTRA_DISEASES];
+
+type Tab = "herbs" | "foods" | "compounds" | "diseases" | "mizaj";
 
 const TABS: { id: Tab; label: string; count: number; icon: React.ReactNode }[] = [
-  { id: "herbs", label: "گیاهان دارویی", count: HERBS.length, icon: <Ic.leaf className="w-4 h-4" /> },
-  { id: "foods", label: "مفردات غذایی", count: FOODS.length, icon: <Ic.mortar className="w-4 h-4" /> },
-  { id: "compounds", label: "داروهای مرکب", count: COMPOUNDS.length, icon: <Ic.flask className="w-4 h-4" /> },
-  { id: "diseases", label: "بیماری‌ها", count: DISEASES.length, icon: <Ic.heart className="w-4 h-4" /> },
+  { id: "herbs", label: "گیاهان دارویی", count: ALL_HERBS.length, icon: <Ic.leaf className="w-4 h-4" /> },
+  { id: "foods", label: "مفردات غذایی", count: ALL_FOODS.length, icon: <Ic.mortar className="w-4 h-4" /> },
+  { id: "compounds", label: "داروهای مرکب", count: ALL_COMPOUNDS.length, icon: <Ic.flask className="w-4 h-4" /> },
+  { id: "diseases", label: "بیماری‌ها", count: ALL_DISEASES.length, icon: <Ic.heart className="w-4 h-4" /> },
+  { id: "mizaj", label: "مزاج‌نامه", count: MIZAJ_GUIDE.length, icon: <Ic.scale className="w-4 h-4" /> },
 ];
+
+/* ---------- نوار مقیاس مزاج ---------- */
+function ScaleBar({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="w-8 text-[10.5px] text-faint shrink-0">{label}</span>
+      <div className="flex-1 h-1.5 bg-night border border-edge/50">
+        <div className="h-full transition-all duration-700" style={{ width: `${value}%`, background: color, opacity: 0.85 }} />
+      </div>
+      <span className="w-7 text-[10px] text-faint" style={{ textAlign: "left" }}>{fa(value)}</span>
+    </div>
+  );
+}
 
 function ExpandShell({
   id,
@@ -67,32 +87,59 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
 
   const norm = (s: string) => s.replace(/ي/g, "ی").replace(/ك/g, "ک").trim().toLowerCase();
 
+  const goRelated = (name: string) => {
+    const n = norm(name);
+    const inHerbs = ALL_HERBS.some((x) => [x.name, x.local, ...x.props].some((s) => norm(s).includes(n)));
+    const inFoods = ALL_FOODS.some((x) => [x.name, x.benefits].some((s) => norm(s).includes(n)));
+    const inCompounds = ALL_COMPOUNDS.some((x) => [x.name, ...x.ingredients].some((s) => norm(s).includes(n)));
+    const inDiseases = ALL_DISEASES.some((x) => [x.name, ...x.symptoms].some((s) => norm(s).includes(n)));
+    if (ALL_HERBS.some((x) => norm(x.name) === n)) setTab("herbs");
+    else if (ALL_FOODS.some((x) => norm(x.name) === n)) setTab("foods");
+    else if (ALL_COMPOUNDS.some((x) => norm(x.name) === n)) setTab("compounds");
+    else if (ALL_DISEASES.some((x) => norm(x.name) === n)) setTab("diseases");
+    else if (inHerbs) setTab("herbs");
+    else if (inCompounds) setTab("compounds");
+    else if (inDiseases) setTab("diseases");
+    else if (inFoods) setTab("foods");
+    setQ(name);
+    setOpenId(null);
+  };
+
   const results = useMemo(() => {
     const nq = norm(q);
+    if (tab === "mizaj") return [];
     if (tab === "herbs")
-      return HERBS.filter(
+      return ALL_HERBS.filter(
         (h) =>
           (temper === "all" || h.temperament === temper) &&
-          (nq === "" || [h.name, h.local, h.latin, h.uses, ...h.props].some((x) => norm(x).includes(nq)))
+          (nq === "" || [h.name, h.local, h.latin, h.uses, ...h.props, ...(HERB_DETAILS[h.id]?.components ?? [])].some((x) => norm(x).includes(nq)))
       );
     if (tab === "foods")
-      return FOODS.filter(
+      return ALL_FOODS.filter(
         (f) =>
           (temper === "all" || f.temperament === temper) &&
-          (nq === "" || [f.name, f.benefits, f.tadabir, f.cat].some((x) => norm(x).includes(nq)))
+          (nq === "" || [f.name, f.benefits, f.tadabir, f.cat, FOOD_DETAILS[f.id]?.nutrition ?? ""].some((x) => norm(x).includes(nq)))
       );
     if (tab === "compounds")
-      return COMPOUNDS.filter(
+      return ALL_COMPOUNDS.filter(
         (c) =>
           (temper === "all" || c.temperament === temper) &&
           (nq === "" || [c.name, c.props, c.use, ...c.ingredients].some((x) => norm(x).includes(nq)))
       );
-    return DISEASES.filter(
+    return ALL_DISEASES.filter(
       (d) =>
         (temper === "all" || d.temperament === temper) &&
         (nq === "" || [d.name, d.causes, ...d.symptoms, ...d.diet, ...d.therapy].some((x) => norm(x).includes(nq)))
     );
   }, [tab, q, temper]);
+
+  const mizajList = useMemo(() => {
+    const nq = norm(q);
+    if (tab !== "mizaj") return [];
+    return MIZAJ_GUIDE.filter(
+      (m) => nq === "" || [m.title, m.desc, m.organ, ...m.body, ...m.best].some((x) => norm(x).includes(nq))
+    );
+  }, [tab, q]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -153,18 +200,83 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
       </Reveal>
 
       <div className="mt-6 flex items-center justify-between text-[12px] text-faint">
-        <span>{fa(results.length)} مدخل یافت شد</span>
+        <span>{tab === "mizaj" ? fa(mizajList.length) : fa(results.length)} مدخل یافت شد</span>
         <span className="hidden sm:block">نشان‌گذاری با کلیک بر نشانِ هر مدخل؛ ذخیره در کتابچهٔ شما</span>
       </div>
 
       {/* فهرست نتایج */}
       <div className="mt-4 grid gap-4">
-        {results.length === 0 && (
+        {tab !== "mizaj" && results.length === 0 && (
           <div className="border border-dashed border-edge p-12 text-center">
             <p className="font-display text-2xl text-dim">چیزی در این قفسه نیافتیم!</p>
             <p className="mt-2 text-sm text-faint">عبارت دیگری را بیازمایید یا فیلتر مزاج را بردارید.</p>
           </div>
         )}
+        {tab === "mizaj" && mizajList.length === 0 && (
+          <div className="border border-dashed border-edge p-12 text-center">
+            <p className="font-display text-2xl text-dim">چیزی در این قفسه نیافتیم!</p>
+            <p className="mt-2 text-sm text-faint">عبارت دیگری را بیازمایید.</p>
+          </div>
+        )}
+
+        {/* ---------- مزاج‌نامهٔ نه‌گانه ---------- */}
+        {tab === "mizaj" &&
+          mizajList.map((m, i) => (
+            <Reveal key={m.id} delay={Math.min(i * 60, 240)}>
+              <ExpandShell
+                id={`m-${m.id}`}
+                openId={openId}
+                setOpenId={setOpenId}
+                header={
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="w-3 h-3 rotate-45 shrink-0" style={{ background: m.colour }} />
+                        <h3 className="font-display text-2xl text-ivory">{m.title}</h3>
+                        <span className="text-[10px] font-bold px-2 py-0.5 border border-edge/70 text-faint">{m.kind}</span>
+                      </div>
+                      <p className="mt-2 text-[13px] text-dim leading-6 max-w-2xl">{m.desc}</p>
+                    </div>
+                    <div className="text-[11px] text-faint text-end shrink-0">
+                      <div>اندام: {m.organ}</div>
+                      {m.season !== "—" && <div className="mt-0.5">فصل: {m.season}</div>}
+                    </div>
+                  </div>
+                }
+              >
+                <div className="mt-4 grid sm:grid-cols-2 gap-3">
+                  <Field label="نشانه‌های جسمانی">
+                    <ul className="space-y-1.5">
+                      {m.body.map((s) => (
+                        <li key={s} className="flex items-start gap-2"><span className="mt-2 w-1.5 h-1.5 rotate-45 shrink-0" style={{ background: m.colour }} />{s}</li>
+                      ))}
+                    </ul>
+                  </Field>
+                  <Field label="نشانه‌های روانی و ذهنی">
+                    <ul className="space-y-1.5">
+                      {m.mind.map((s) => (
+                        <li key={s} className="flex items-start gap-2"><span className="mt-2 w-1.5 h-1.5 rotate-45 shrink-0" style={{ background: m.colour }} />{s}</li>
+                      ))}
+                    </ul>
+                  </Field>
+                  <Field label="سازگارترین تدابیر">
+                    <span className="flex flex-wrap gap-1.5">
+                      {m.best.map((s) => (
+                        <span key={s} className="px-2.5 py-1 bg-teal/8 border border-teal/30 text-[12px] text-teal">{s}</span>
+                      ))}
+                    </span>
+                  </Field>
+                  <Field label="پرهیزات" warn>
+                    <span className="flex flex-wrap gap-1.5">
+                      {m.avoid.map((s) => (
+                        <span key={s} className="px-2.5 py-1 bg-madder/8 border border-madder/30 text-[12px] text-madder">{s}</span>
+                      ))}
+                    </span>
+                  </Field>
+                </div>
+              </ExpandShell>
+            </Reveal>
+          ))}
 
         {tab === "herbs" &&
           (results as Herb[]).map((h, i) => (
@@ -194,13 +306,63 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                   </div>
                 }
               >
-                <div className="grid sm:grid-cols-2 gap-3 mt-4">
-                  <Field label="موارد استفاده در سنت">{h.uses}</Field>
-                  <Field label="منع مصرف" warn>{h.contra}</Field>
-                  <Field label="تداخلات دارویی">{h.interactions}</Field>
-                  <Field label="احتیاط و دوز">{h.caution}</Field>
-                </div>
-                <p className="mt-3 text-[11px] text-faint">منابع: مخزن‌الادویه، تحفه‌المؤمنین، تک‌نگاری‌های هیئت علمی — {fa(h.votes)} امتیاز کاربران</p>
+                {(() => {
+                  const d = HERB_DETAILS[h.id];
+                  return (
+                    <div className="mt-4 space-y-3">
+                      {/* مقیاس مزاج + زیستگاه و پیشینه */}
+                      {d && (
+                        <div className="grid sm:grid-cols-[220px_1fr] gap-3">
+                          <div className="border border-edge/70 bg-night/30 p-3.5">
+                            <div className="text-[11px] font-bold text-teal mb-2.5">مقیاس کیفیات</div>
+                            <div className="space-y-2">
+                              <ScaleBar label="گرمی" value={d.scale.hot} color="#d8604a" />
+                              <ScaleBar label="سردی" value={d.scale.cold} color="#3fc8b8" />
+                              <ScaleBar label="خشکی" value={d.scale.dry} color="#e3b558" />
+                              <ScaleBar label="تری" value={d.scale.wet} color="#7fb8c9" />
+                            </div>
+                          </div>
+                          <div className="grid gap-3">
+                            <Field label="زیستگاه و خاستگاه">{d.habitat}</Field>
+                            <Field label="پیشینه در سنت ایرانی">{d.history}</Field>
+                          </div>
+                        </div>
+                      )}
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <Field label="موارد استفاده در سنت">{h.uses}</Field>
+                        <Field label="روش تهیه و مصرف">{d ? d.method : "طبق دستور متخصص."}</Field>
+                        <Field label="دوز متعارف">{d ? d.dose : "با نظر متخصص."}</Field>
+                        {d && (
+                          <Field label="ترکیبات شاخص">
+                            <span className="flex flex-wrap gap-1.5">
+                              {d.components.map((c) => (
+                                <span key={c} className="px-2.5 py-1 bg-pane border border-edge/60 text-[12px]">{c}</span>
+                              ))}
+                            </span>
+                          </Field>
+                        )}
+                        <Field label="منع مصرف" warn>{h.contra}</Field>
+                        <Field label="تداخلات دارویی">{h.interactions}</Field>
+                        <Field label="احتیاط">{h.caution}</Field>
+                      </div>
+                      {d && (
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="text-[11px] font-bold text-faint me-1">مفاهیم مرتبط در هستی‌شناسی:</span>
+                          {d.related.map((r) => (
+                            <button
+                              key={r}
+                              onClick={() => goRelated(r)}
+                              className="text-[12px] px-3 py-1 border border-teal/40 text-teal hover:bg-teal hover:text-night transition-all duration-300"
+                            >
+                              {r}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-[11px] text-faint border-t border-edge/60 pt-3">منابع: مخزن‌الادویه، تحفه‌المؤمنین، تک‌نگاری‌های هیئت علمی — {fa(h.votes)} امتیاز کاربران</p>
+                    </div>
+                  );
+                })()}
               </ExpandShell>
             </Reveal>
           ))}
@@ -226,10 +388,18 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                     </div>
                   }
                 >
-                  <div className="grid gap-3 mt-4">
-                    <Field label="ارزش و خواص از دیدگاه سنت">{f.benefits}</Field>
-                    <Field label="تدابیر و مصلح">{f.tadabir}</Field>
-                  </div>
+                  {(() => {
+                    const fd = FOOD_DETAILS[f.id];
+                    return (
+                      <div className="grid gap-3 mt-4">
+                        <Field label="ارزش و خواص از دیدگاه سنت">{f.benefits}</Field>
+                        {fd && <Field label="ارزش غذایی (هر ۱۰۰ گرم)">{fd.nutrition}</Field>}
+                        <Field label="تدابیر و مصلح">{f.tadabir}</Field>
+                        {fd && <Field label="پیشینه در سفرهٔ ایرانی">{fd.history}</Field>}
+                        {fd && <Field label="احتیاط" warn>{fd.caution}</Field>}
+                      </div>
+                    );
+                  })()}
                 </ExpandShell>
               </Reveal>
             ))}

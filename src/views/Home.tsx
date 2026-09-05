@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  ARTICLES,
   BOOKS,
   ELEMENTS,
   EVENTS,
@@ -12,6 +11,7 @@ import {
   STATS,
   TEMPERAMENTS,
 } from "../data";
+import { LONG_ARTICLES } from "../dataExtra";
 import { CountUp, Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
 
 type Go = (view: string, opts?: { q?: string }) => void;
@@ -191,7 +191,7 @@ export default function Home({ go }: { go: Go }) {
   }, []);
 
   const tickerItems = HERBS.map((h) => ({ name: h.name, label: TEMPERAMENTS[h.temperament].label, color: TEMPERAMENTS[h.temperament].color }));
-  const featured = ARTICLES[0];
+  const featured = LONG_ARTICLES[0];
 
   const bento = [
     { title: "دانشنامهٔ جامع", desc: "گیاهان دارویی، مفردات غذایی، مرکبات و بیماری‌ها با شناسنامهٔ داوری‌شده", view: "encyclopedia", icon: <Ic.leaf className="w-7 h-7" />, big: true },
@@ -396,7 +396,7 @@ export default function Home({ go }: { go: Go }) {
             </button>
           </Reveal>
           <div className="flex flex-col gap-3">
-            {ARTICLES.slice(1, 5).map((a, i) => (
+            {LONG_ARTICLES.slice(1, 5).map((a, i) => (
               <Reveal key={a.id} delay={i * 80}>
                 <button onClick={() => go("journal")} className="card-lift w-full text-start border border-edge bg-deep p-4 sm:p-5 flex items-center gap-4 group">
                   <span className="font-display text-3xl text-edge group-hover:text-gold transition-colors duration-300 shrink-0">{fa(i + 2).replace("۱", "")}</span>

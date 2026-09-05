@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ARTICLES, BOOKS, COMPOUNDS, COURSES, DISEASES, EVENTS, FOODS, HERBS, PRODUCTS } from "./data";
+import { BOOKS, COMPOUNDS, COURSES, DISEASES, EVENTS, FOODS, HERBS, PRODUCTS } from "./data";
+import { EXTRA_COMPOUNDS, EXTRA_DISEASES, EXTRA_FOODS, EXTRA_HERBS, LONG_ARTICLES } from "./dataExtra";
 import { BookmarkProvider, Ic, Shamseh, ToastProvider, fa, useMarks, useToast } from "./ui";
 import Home from "./views/Home";
 import Encyclopedia from "./views/Encyclopedia";
@@ -30,11 +31,11 @@ const KINDS = ["همه", "گیاه دارویی", "مفرد غذایی", "دار
 
 function buildIndex(): SearchItem[] {
   return [
-    ...HERBS.map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name })),
-    ...FOODS.map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name })),
-    ...COMPOUNDS.map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name })),
-    ...DISEASES.map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
-    ...ARTICLES.map((a) => ({ id: a.id, title: a.title, sub: a.cat, view: "journal" as ViewId, kind: "مقاله" })),
+    ...[...HERBS, ...EXTRA_HERBS].map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name })),
+    ...[...FOODS, ...EXTRA_FOODS].map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name })),
+    ...[...COMPOUNDS, ...EXTRA_COMPOUNDS].map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name })),
+    ...[...DISEASES, ...EXTRA_DISEASES].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
+    ...LONG_ARTICLES.map((a) => ({ id: a.id, title: a.title, sub: a.cat, view: "journal" as ViewId, kind: "مقاله" })),
     ...BOOKS.map((b) => ({ id: b.id, title: `«${b.title}»`, sub: b.author, view: "library" as ViewId, kind: "کتاب", q: b.title })),
     ...COURSES.map((c) => ({ id: c.id, title: c.title, sub: `دورهٔ ${c.level}`, view: "academy" as ViewId, kind: "دوره" })),
     ...PRODUCTS.map((p) => ({ id: p.id, title: p.name, sub: p.seller, view: "market" as ViewId, kind: "محصول" })),
