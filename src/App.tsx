@@ -18,6 +18,8 @@ import Library from "./views/Library";
 import Market from "./views/Market";
 import Community from "./views/Community";
 import { About, Contact, Faq } from "./views/Info";
+import { PlateArt } from "./plate";
+import type { ArtKind } from "./plate";
 
 type ViewId = "home" | "encyclopedia" | "quiz" | "journal" | "academy" | "library" | "market" | "community" | "about" | "contact" | "faq";
 
@@ -32,16 +34,16 @@ const NAV: { id: ViewId; label: string }[] = [
   { id: "community", label: "انجمن" },
 ];
 
-type SearchItem = { id: string; title: string; sub: string; view: ViewId; kind: string; q?: string };
+type SearchItem = { id: string; title: string; sub: string; view: ViewId; kind: string; q?: string; art?: { k: ArtKind; t?: string } };
 
 const KINDS = ["همه", "گیاه دارویی", "مفرد غذایی", "داروی مرکب", "بیماری", "مقاله", "کتاب", "دوره", "محصول", "رویداد"];
 
 function buildIndex(): SearchItem[] {
   return [
-    ...[...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2].map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name })),
-    ...[...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2].map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name })),
-    ...[...COMPOUNDS, ...EXTRA_COMPOUNDS, ...EXTRA_COMPOUNDS_2].map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name })),
-    ...[...DISEASES, ...EXTRA_DISEASES, ...EXTRA_DISEASES_2, ...EXTRA_DISEASES_3].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
+    ...[...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2].map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name, art: { k: "herb" as ArtKind, t: h.temperament } })),
+    ...[...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2].map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name, art: { k: "food" as ArtKind, t: f.temperament } })),
+    ...[...COMPOUNDS, ...EXTRA_COMPOUNDS, ...EXTRA_COMPOUNDS_2].map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name, art: { k: "compound" as ArtKind, t: c.temperament } })),
+    ...[...DISEASES, ...EXTRA_DISEASES, ...EXTRA_DISEASES_2, ...EXTRA_DISEASES_3].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name, art: { k: "disease" as ArtKind, t: d.temperament } })),
     ...ALL_JOURNAL_ARTICLES.map((a) => ({ id: a.id, title: a.title, sub: a.cat, view: "journal" as ViewId, kind: "مقاله" })),
     ...BOOKS.map((b) => ({ id: b.id, title: `«${b.title}»`, sub: b.author, view: "library" as ViewId, kind: "کتاب", q: b.title })),
     ...FULL_COURSES.map((c) => ({ id: c.id, title: c.title, sub: `دورهٔ باز • ${fa(c.lessons.length)} درس • ${fa(c.hours)} ساعت`, view: "academy" as ViewId, kind: "دوره" })),
@@ -250,11 +252,17 @@ function AppInner() {
                   <p className="text-center text-[13px] text-faint py-10">چیزی نیافتیم؛ واژهٔ دیگری بیازمایید یا فیلتر را تغییر دهید.</p>
                 )}
                 {results.map((r) => (
-                  <button key={`${r.kind}-${r.id}`} onClick={() => go(r.view, { q: r.q })} className="w-full flex items-center gap-3.5 px-4 py-3 hover:bg-pane text-start transition-colors group">
-                    <span className="shrink-0 text-[10px] font-bold text-gold border border-gold/35 bg-gold/5 px-2 py-1">{r.kind}</span>
+                  <button key={`${r.kind}-${r.id}`} onClick={() => go(r.view, { q: r.q })} className="w-full flex items-center gap-3.5 px-4 py-2.5 hover:bg-pane text-start transition-colors group">
+                    {r.art ? (
+                      <span className="shrink-0 w-14 h-10 border border-edge/70 overflow-hidden">
+                        <PlateArt kind={r.art.k} id={r.id} temperament={r.art.t} />
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[10px] font-bold text-gold border border-gold/35 bg-gold/5 px-2 py-1">{r.kind}</span>
+                    )}
                     <span className="flex-1 min-w-0">
                       <span className="block text-[14px] font-semibold text-ivory truncate group-hover:text-goldsoft transition-colors">{r.title}</span>
-                      <span className="block text-[11px] text-faint truncate">{r.sub}</span>
+                      <span className="block text-[11px] text-faint truncate">{r.kind} — {r.sub}</span>
                     </span>
                     <Ic.arrow className="w-4 h-4 text-faint group-hover:text-gold transition-all group-hover:-translate-x-1 shrink-0" />
                   </button>

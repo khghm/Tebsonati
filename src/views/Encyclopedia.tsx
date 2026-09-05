@@ -14,6 +14,7 @@ import { EXTRA_COMPOUNDS_2 } from "../dataCompounds2";
 import { EXTRA_DISEASES_2 } from "../dataDiseases2";
 import { EXTRA_DISEASES_3 } from "../dataDiseases3";
 import { Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
+import { PlateArt } from "../plate";
 
 const ALL_HERBS = [...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2];
 const ALL_FOODS = [...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2];
@@ -238,18 +239,25 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                 openId={openId}
                 setOpenId={setOpenId}
                 header={
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <span className="w-3 h-3 rotate-45 shrink-0" style={{ background: m.colour }} />
-                        <h3 className="font-display text-2xl text-ivory">{m.title}</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 border border-edge/70 text-faint">{m.kind}</span>
-                      </div>
-                      <p className="mt-2 text-[13px] text-dim leading-6 max-w-2xl">{m.desc}</p>
+                  <div className="flex items-start gap-4">
+                    <div className="w-28 sm:w-36 h-20 sm:h-28 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
+                      <PlateArt kind="mizaj" id={m.id} color={m.colour} />
                     </div>
-                    <div className="text-[11px] text-faint text-end shrink-0">
-                      <div>اندام: {m.organ}</div>
-                      {m.season !== "—" && <div className="mt-0.5">فصل: {m.season}</div>}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="w-3 h-3 rotate-45 shrink-0" style={{ background: m.colour }} />
+                            <h3 className="font-display text-2xl text-ivory">{m.title}</h3>
+                            <span className="text-[10px] font-bold px-2 py-0.5 border border-edge/70 text-faint">{m.kind}</span>
+                          </div>
+                          <p className="mt-2 text-[13px] text-dim leading-6 max-w-2xl">{m.desc}</p>
+                        </div>
+                        <div className="text-[11px] text-faint text-end shrink-0">
+                          <div>اندام: {m.organ}</div>
+                          {m.season !== "—" && <div className="mt-0.5">فصل: {m.season}</div>}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 }
@@ -296,22 +304,29 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                 openId={openId}
                 setOpenId={setOpenId}
                 header={
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h3 className="font-display text-2xl text-ivory">{h.name}</h3>
-                        <TemperChip label={TEMPERAMENTS[h.temperament].label} color={TEMPERAMENTS[h.temperament].color} />
-                      </div>
-                      <p className="mt-1 text-[12px] text-faint">{h.local} — <span className="italic" dir="ltr">{h.latin}</span> — بخش مورد استفاده: {h.parts}</p>
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
-                        {h.props.map((p) => (
-                          <span key={p} className="text-[11px] px-2.5 py-1 bg-pane border border-edge/60 text-dim">{p}</span>
-                        ))}
-                      </div>
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+                    <div className="sm:w-52 sm:shrink-0 h-36 sm:h-40 border border-edge/70 overflow-hidden">
+                      <PlateArt kind="herb" id={h.id} temperament={h.temperament} caption={h.latin} />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1.5 text-[11px] text-faint"><Stars value={h.rating} />{fa(h.rating)}</span>
-                      <MarkButton id={h.id} label={`گیاه ${h.name}`} view="encyclopedia" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h3 className="font-display text-2xl text-ivory">{h.name}</h3>
+                            <TemperChip label={TEMPERAMENTS[h.temperament].label} color={TEMPERAMENTS[h.temperament].color} />
+                          </div>
+                          <p className="mt-1 text-[12px] text-faint">{h.local} — <span className="italic" dir="ltr">{h.latin}</span> — بخش مورد استفاده: {h.parts}</p>
+                          <div className="mt-2.5 flex flex-wrap gap-1.5">
+                            {h.props.map((p) => (
+                              <span key={p} className="text-[11px] px-2.5 py-1 bg-pane border border-edge/60 text-dim">{p}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1.5 text-[11px] text-faint"><Stars value={h.rating} />{fa(h.rating)}</span>
+                          <MarkButton id={h.id} label={`گیاه ${h.name}`} view="encyclopedia" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 }
@@ -386,15 +401,20 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                   openId={openId}
                   setOpenId={setOpenId}
                   header={
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <h3 className="font-display text-xl text-ivory">{f.name}</h3>
-                          <TemperChip label={TEMPERAMENTS[f.temperament].label} color={TEMPERAMENTS[f.temperament].color} />
-                        </div>
-                        <MarkButton id={f.id} label={`غذای ${f.name}`} view="encyclopedia" />
+                    <div className="flex items-start gap-4">
+                      <div className="w-28 sm:w-32 h-20 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
+                        <PlateArt kind="food" id={f.id} temperament={f.temperament} />
                       </div>
-                      <p className="mt-1 text-[11px] text-teal font-semibold">{f.cat}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <h3 className="font-display text-xl text-ivory">{f.name}</h3>
+                            <TemperChip label={TEMPERAMENTS[f.temperament].label} color={TEMPERAMENTS[f.temperament].color} />
+                          </div>
+                          <MarkButton id={f.id} label={`غذای ${f.name}`} view="encyclopedia" />
+                        </div>
+                        <p className="mt-1 text-[11px] text-teal font-semibold">{f.cat}</p>
+                      </div>
                     </div>
                   }
                 >
@@ -425,16 +445,21 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                   openId={openId}
                   setOpenId={setOpenId}
                   header={
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                          <h3 className="font-display text-xl text-ivory">{c.name}</h3>
-                          <span className="text-[10px] font-bold px-2 py-0.5 bg-lapis/20 text-[#9cc0ea] border border-lapis/40">{c.kind}</span>
-                          <TemperChip label={TEMPERAMENTS[c.temperament].label} color={TEMPERAMENTS[c.temperament].color} />
-                        </div>
-                        <MarkButton id={c.id} label={`داروی ${c.name}`} view="encyclopedia" />
+                    <div className="flex items-start gap-4">
+                      <div className="w-28 sm:w-32 h-20 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
+                        <PlateArt kind="compound" id={c.id} temperament={c.temperament} />
                       </div>
-                      <p className="mt-2 text-[13px] text-dim leading-6">{c.props}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <h3 className="font-display text-xl text-ivory">{c.name}</h3>
+                            <span className="text-[10px] font-bold px-2 py-0.5 bg-lapis/20 text-[#9cc0ea] border border-lapis/40">{c.kind}</span>
+                            <TemperChip label={TEMPERAMENTS[c.temperament].label} color={TEMPERAMENTS[c.temperament].color} />
+                          </div>
+                          <MarkButton id={c.id} label={`داروی ${c.name}`} view="encyclopedia" />
+                        </div>
+                        <p className="mt-2 text-[13px] text-dim leading-6">{c.props}</p>
+                      </div>
                     </div>
                   }
                 >
@@ -463,12 +488,19 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                 openId={openId}
                 setOpenId={setOpenId}
                 header={
-                  <div className="flex items-start justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <h3 className="font-display text-2xl text-ivory">{d.name}</h3>
-                      <TemperChip label={TEMPERAMENTS[d.temperament].label} color={TEMPERAMENTS[d.temperament].color} />
+                  <div className="flex items-start gap-4">
+                    <div className="w-32 sm:w-40 h-20 sm:h-28 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
+                      <PlateArt kind="disease" id={d.id} temperament={d.temperament} />
                     </div>
-                    <MarkButton id={d.id} label={d.name} view="encyclopedia" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <h3 className="font-display text-2xl text-ivory">{d.name}</h3>
+                          <TemperChip label={TEMPERAMENTS[d.temperament].label} color={TEMPERAMENTS[d.temperament].color} />
+                        </div>
+                        <MarkButton id={d.id} label={d.name} view="encyclopedia" />
+                      </div>
+                    </div>
                   </div>
                 }
               >
