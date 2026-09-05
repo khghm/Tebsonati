@@ -513,19 +513,38 @@ function saveDisk(d: Record<string, string>) {
 const mem = new Map<string, string | null>();
 const inflight = new Map<string, Promise<string | null>>();
 
+/* واکشی تصویر شاخص مقاله؛ دو مسیر برای اطمینان بیشتر:
+   ۱) API رسمی مدیاویکی با origin=* (سازگارترین نقطه برای CORS)
+   ۲) سرویس REST خلاصهٔ صفحه به‌عنوان fallback */
 async function fetchThumb(title: string): Promise<string | null> {
   const ctrl = new AbortController();
-  const to = setTimeout(() => ctrl.abort(), 6000);
+  const to = setTimeout(() => ctrl.abort(), 7000);
   try {
-    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
+    /* مسیر ۱: اکشن API مدیاویکی */
+    try {
+      const api =
+        "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=640&redirects=1&origin=*&titles=" +
+        encodeURIComponent(title);
+      const r = await fetch(api, { signal: ctrl.signal });
+      if (r.ok) {
+        const j = (await r.json()) as { query?: { pages?: Record<string, { thumbnail?: { source?: string } }> } };
+        const pages = j.query?.pages ?? {};
+        const first = Object.values(pages)[0];
+        const t = first?.thumbnail?.source;
+        if (t) return t.replace(/\/\d+px-/, "/640px-");
+      }
+    } catch { /* به مسیر بعدی می‌رویم */ }
+
+    /* مسیر ۲: REST خلاصهٔ صفحه */
+    const r2 = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
       signal: ctrl.signal,
     });
-    if (!r.ok) return null;
-    const j = (await r.json()) as { thumbnail?: { source?: string }; originalimage?: { source?: string } };
-    let t = j.thumbnail?.source;
-    if (!t && j.originalimage?.source) t = j.originalimage.source;
-    if (!t) return null;
-    return t.replace(/\/\d+px-/, "/640px-");
+    if (!r2.ok) return null;
+    const j2 = (await r2.json()) as { thumbnail?: { source?: string }; originalimage?: { source?: string } };
+    let t2 = j2.thumbnail?.source;
+    if (!t2 && j2.originalimage?.source) t2 = j2.originalimage.source;
+    if (!t2) return null;
+    return t2.replace(/\/\d+px-/, "/640px-");
   } catch {
     return null;
   } finally {

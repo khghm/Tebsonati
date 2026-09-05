@@ -1,7 +1,7 @@
 /* ===== سامانهٔ تصویرسازی نسخه‌های خطی =====
    برای هر مدخل دانشنامه، بر پایهٔ شناسه و مزاج، یک «تصویر نسخهٔ خطی» یکتا
    به سبک هرباریوم و تذهیب ایرانی تولید می‌شود. */
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { TEMPERAMENTS } from "./data";
 import { entryPhoto } from "./entryImages";
 import { useWikiPhoto } from "./wikiPhotos";
@@ -395,16 +395,22 @@ export function EntryPhoto({
   className?: string;
 }) {
   const [err, setErr] = useState(false);
-  const [wikiLoaded, setWikiLoaded] = useState(false);
+  const [wikiFailed, setWikiFailed] = useState(false);
   const base = useMemo(() => entryPhoto(kind, hint, id), [kind, hint, id]);
   const wikiUrl = useWikiPhoto(wiki ?? null);
 
-  /* اگر عکس دقیقِ همان مدخل از ویکی‌پدیا رسید، روی لایهٔ پایه نمایش می‌دهیم */
-  const showWiki = !!wikiUrl && wikiLoaded;
+  /* با تغییر آدرس، وضعیت خطا بازنشانی می‌شود */
+  useEffect(() => {
+    setWikiFailed(false);
+  }, [wikiUrl]);
+
+  /* نمایش خوش‌بینانه: به‌محض رسیدن آدرسِ عکس واقعی، آن را نشان می‌دهیم و فقط در صورت خطا پنهان می‌کنیم.
+     این کار باگ «تصویرِ از پیش کش‌شده که رویداد onLoad برایش شلیک نمی‌کند» را برطرف می‌کند. */
+  const showWiki = !!wikiUrl && !wikiFailed;
 
   return (
     <div className={`relative w-full h-full overflow-hidden bg-deep ${className}`}>
-      {/* لایهٔ پایه (دسته‌بندی یا نسخهٔ خطی) */}
+      {/* لایهٔ پایه (دسته‌بندی یا نسخهٔ خطی) — همیشه زیر، تا هیچ‌گاه جای خالی نباشد */}
       {base && !err ? (
         <img
           src={base}
@@ -419,14 +425,15 @@ export function EntryPhoto({
         </div>
       )}
 
-      {/* عکس واقعیِ خود مدخل */}
+      {/* عکس واقعیِ خود مدخل — به‌محض رسیدن آدرس سوار می‌شود؛ فقط در صورت خطا پنهان می‌ماند */}
       {wikiUrl && (
         <img
           src={wikiUrl}
           alt={caption ?? ""}
           loading="lazy"
-          onLoad={() => setWikiLoaded(true)}
-          onError={() => setWikiLoaded(false)}
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setWikiFailed(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out hover:scale-[1.06] ${showWiki ? "opacity-100" : "opacity-0"}`}
         />
       )}
