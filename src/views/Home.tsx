@@ -13,7 +13,7 @@ import {
 } from "../data";
 import { ALL_JOURNAL_ARTICLES } from "../journalArticles";
 import { CountUp, Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
-import { PlateArt } from "../plate";
+import { EntryPhoto } from "../plate";
 
 /* پربازدیدترین مقالات برای صفحهٔ خانه */
 const POPULAR_ARTICLES = [...ALL_JOURNAL_ARTICLES].sort((a, b) => b.views - a.views);
@@ -347,7 +347,7 @@ export default function Home({ go }: { go: Go }) {
             <Reveal key={h.id} delay={i * 60} className="snap-start shrink-0 w-[270px]">
               <div className="card-lift frame h-full border border-edge bg-deep p-5 flex flex-col">
                 <div className="h-28 border border-edge/70 overflow-hidden mb-4">
-                  <PlateArt kind="herb" id={h.id} temperament={h.temperament} caption={h.latin} />
+                  <EntryPhoto kind="herb" id={h.id} temperament={h.temperament} hint={h.parts} caption={h.latin} />
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <TemperChip label={TEMPERAMENTS[h.temperament].label} color={TEMPERAMENTS[h.temperament].color} />

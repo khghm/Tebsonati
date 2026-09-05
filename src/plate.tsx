@@ -1,8 +1,9 @@
 /* ===== سامانهٔ تصویرسازی نسخه‌های خطی =====
    برای هر مدخل دانشنامه، بر پایهٔ شناسه و مزاج، یک «تصویر نسخهٔ خطی» یکتا
    به سبک هرباریوم و تذهیب ایرانی تولید می‌شود. */
-import { useId, useMemo } from "react";
+import { useId, useMemo, useState } from "react";
 import { TEMPERAMENTS } from "./data";
+import { entryPhoto } from "./entryImages";
 
 export type ArtKind = "herb" | "food" | "compound" | "disease" | "mizaj";
 
@@ -367,5 +368,59 @@ export function PlateArt({
     <svg viewBox="0 0 200 140" preserveAspectRatio="xMidYMid slice" className={`w-full h-full block ${className}`} role="img" aria-hidden="true">
       {content}
     </svg>
+  );
+}
+
+/* ---------- تصویر واقعی مدخل ----------
+   تصویر فتورئالیستیک متناسب با مدخل را نمایش می‌دهد؛ در صورت خطا در بارگذاری،
+   به‌صورت خودکار به تصویر نسخهٔ خطی برمی‌گردد. */
+export function EntryPhoto({
+  kind,
+  id,
+  temperament,
+  hint = "",
+  caption,
+  tint,
+  className = "",
+}: {
+  kind: ArtKind;
+  id: string;
+  temperament?: string;
+  hint?: string;
+  caption?: string;
+  tint?: string;
+  className?: string;
+}) {
+  const [err, setErr] = useState(false);
+  const src = useMemo(() => entryPhoto(kind, hint, id), [kind, hint, id]);
+
+  if (err || !src) {
+    return <PlateArt kind={kind} id={id} temperament={temperament} caption={caption} className={className} />;
+  }
+
+  return (
+    <div className={`relative w-full h-full overflow-hidden bg-deep ${className}`}>
+      <img
+        src={src}
+        alt={caption ?? ""}
+        loading="lazy"
+        onError={() => setErr(true)}
+        className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-[1.06]"
+      />
+      {/* سایهٔ خوانایی و لایهٔ رنگ مزاج */}
+      <span className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,21,34,0.62), rgba(10,21,34,0.05) 55%)" }} />
+      {tint && <span className="pointer-events-none absolute inset-0 mix-blend-color" style={{ background: tint }} />}
+      {caption && (
+        <span
+          className="absolute bottom-1.5 start-2 text-[9.5px] italic text-[#eadfc6]/95"
+          dir="ltr"
+          style={{ textAlign: "left", textShadow: "0 1px 4px rgba(0,0,0,0.85)" }}
+        >
+          {caption}
+        </span>
+      )}
+      {/* قاب تزئینی */}
+      <span className="pointer-events-none absolute inset-1.5 border border-[#e3b558]/25" />
+    </div>
   );
 }

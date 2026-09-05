@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { MIZAJ_PROFILES, QUIZ } from "../data";
 import type { MizajProfile } from "../data";
 import { Ic, Reveal, fa, useToast } from "../ui";
-import { PlateArt } from "../plate";
+import { EntryPhoto } from "../plate";
 
 type Stage = "intro" | "quiz" | "result";
 type Scores = { hot: number; cold: number; wet: number; dry: number };
@@ -178,8 +178,8 @@ export default function Quiz() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-14">
       <Reveal>
         <div className="text-center">
-          <div className="mx-auto w-56 h-40 mb-2 border border-edge/70 overflow-hidden">
-            <PlateArt kind="mizaj" id={profile.id} color={profile.color} />
+          <div className="mx-auto w-72 h-44 mb-2 border border-gold/40 overflow-hidden shadow-[0_16px_44px_-16px_rgba(0,0,0,0.85)]">
+            <EntryPhoto kind="mizaj" id={profile.id} tint={`${profile.color}2e`} caption={`مزاج ${profile.title}`} />
           </div>
           <p className="font-nasta text-gold text-2xl">نتیجهٔ مزاج‌سنجی شما</p>
           <h1 className="mt-1 font-display text-4xl sm:text-5xl" style={{ color: profile.color }}>{profile.title}</h1>
