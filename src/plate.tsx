@@ -373,8 +373,20 @@ export function PlateArt({
 }
 
 /* ---------- تصویر واقعی مدخل ----------
-   تصویر فتورئالیستیک متناسب با مدخل را نمایش می‌دهد؛ در صورت خطا در بارگذاری،
-   به‌صورت خودکار به تصویر نسخهٔ خطی برمی‌گردد. */
+   سه لایهٔ تصویری با اولویت:
+   ۱. لایهٔ پایه (تصویر دسته‌بندی یا نسخهٔ خطی) — همیشه، بدون هیچ درخواستی
+   ۲. عکس کلیدواژه‌ای — آدرس مستقیم img (بدون fetch و بدون CORS) از Flickr؛
+      کلیدواژه از نام دقیق مدخل ساخته می‌شود (زعفران ← crocus,sativus) و با lock
+      برای هر مدخل ثابت و قطعی است.
+   ۳. عکس دقیق ویکی‌پدیا — اگر محیط اجازهٔ واکشی بدهد، روی همه می‌نشیند. */
+
+/* ساخت کلیدواژهٔ عکس از عنوان مدخل (نام علمی یا معادل انگلیسی) */
+function titleToKeywords(t: string): string {
+  const clean = t.replace(/_/g, " ").replace(/\(.*?\)/g, "").trim().toLowerCase();
+  const words = clean.split(/[\s-]+/).filter((w) => w.length > 2).slice(0, 2);
+  return words.join(",");
+}
+
 export function EntryPhoto({
   kind,
   id,
@@ -396,17 +408,29 @@ export function EntryPhoto({
 }) {
   const [err, setErr] = useState(false);
   const [wikiFailed, setWikiFailed] = useState(false);
+  const [kwFailed, setKwFailed] = useState(false);
   const base = useMemo(() => entryPhoto(kind, hint, id), [kind, hint, id]);
   const wikiUrl = useWikiPhoto(wiki ?? null);
+
+  /* آدرس مستقیم عکس کلیدواژه‌ای — بدون نیاز به هیچ واکشی جاوااسکریپتی */
+  const kwUrl = useMemo(() => {
+    if (!wiki) return null;
+    const kw = titleToKeywords(wiki);
+    if (!kw) return null;
+    const lock = strSeed(id) % 999;
+    return `https://loremflickr.com/640/480/${encodeURIComponent(kw)}?lock=${lock}`;
+  }, [wiki, id]);
 
   /* با تغییر آدرس، وضعیت خطا بازنشانی می‌شود */
   useEffect(() => {
     setWikiFailed(false);
-  }, [wikiUrl]);
+    setKwFailed(false);
+  }, [wikiUrl, kwUrl]);
 
   /* نمایش خوش‌بینانه: به‌محض رسیدن آدرسِ عکس واقعی، آن را نشان می‌دهیم و فقط در صورت خطا پنهان می‌کنیم.
      این کار باگ «تصویرِ از پیش کش‌شده که رویداد onLoad برایش شلیک نمی‌کند» را برطرف می‌کند. */
   const showWiki = !!wikiUrl && !wikiFailed;
+  const showKw = !!kwUrl && !kwFailed && !showWiki;
 
   return (
     <div className={`relative w-full h-full overflow-hidden bg-deep ${className}`}>
@@ -417,15 +441,28 @@ export function EntryPhoto({
           alt=""
           loading="lazy"
           onError={() => setErr(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${showWiki ? "opacity-0" : "opacity-100"}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${showWiki || showKw ? "opacity-0" : "opacity-100"}`}
         />
       ) : (
-        <div className={`absolute inset-0 transition-opacity duration-700 ${showWiki ? "opacity-0" : "opacity-100"}`}>
+        <div className={`absolute inset-0 transition-opacity duration-700 ${showWiki || showKw ? "opacity-0" : "opacity-100"}`}>
           <PlateArt kind={kind} id={id} temperament={temperament} />
         </div>
       )}
 
-      {/* عکس واقعیِ خود مدخل — به‌محض رسیدن آدرس سوار می‌شود؛ فقط در صورت خطا پنهان می‌ماند */}
+      {/* عکس کلیدواژه‌ایِ خود مدخل — بارگذاری مستقیم با img، بدون fetch */}
+      {kwUrl && (
+        <img
+          src={kwUrl}
+          alt={caption ?? ""}
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setKwFailed(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out hover:scale-[1.06] ${showKw ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
+
+      {/* عکس دقیق ویکی‌پدیا — به‌محض رسیدن آدرس سوار می‌شود؛ فقط در صورت خطا پنهان می‌ماند */}
       {wikiUrl && (
         <img
           src={wikiUrl}
