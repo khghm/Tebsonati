@@ -15,6 +15,7 @@ import { EXTRA_DISEASES_2 } from "../dataDiseases2";
 import { EXTRA_DISEASES_3 } from "../dataDiseases3";
 import { Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
 import { EntryPhoto } from "../plate";
+import { compoundWikiTitle, diseaseWikiTitle, foodWikiTitle, herbWikiTitle } from "../wikiPhotos";
 
 const ALL_HERBS = [...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2];
 const ALL_FOODS = [...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2];
@@ -306,7 +307,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                 header={
                   <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
                     <div className="sm:w-52 sm:shrink-0 h-36 sm:h-40 border border-edge/70 overflow-hidden">
-                      <EntryPhoto kind="herb" id={h.id} temperament={h.temperament} hint={h.parts} caption={h.latin} />
+                      <EntryPhoto kind="herb" id={h.id} temperament={h.temperament} hint={h.parts} caption={h.latin} wiki={herbWikiTitle(h)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -403,7 +404,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                   header={
                     <div className="flex items-start gap-4">
                       <div className="w-28 sm:w-32 h-20 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
-                        <EntryPhoto kind="food" id={f.id} temperament={f.temperament} hint={f.cat} />
+                        <EntryPhoto kind="food" id={f.id} temperament={f.temperament} hint={f.cat} wiki={foodWikiTitle(f.name)} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
@@ -447,7 +448,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                   header={
                     <div className="flex items-start gap-4">
                       <div className="w-28 sm:w-32 h-20 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
-                        <EntryPhoto kind="compound" id={c.id} temperament={c.temperament} hint={c.kind} />
+                        <EntryPhoto kind="compound" id={c.id} temperament={c.temperament} hint={c.kind} wiki={compoundWikiTitle(c.name, c.ingredients)} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
@@ -490,7 +491,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
                 header={
                   <div className="flex items-start gap-4">
                     <div className="w-32 sm:w-40 h-20 sm:h-28 shrink-0 border border-edge/70 overflow-hidden hidden sm:block">
-                      <EntryPhoto kind="disease" id={d.id} temperament={d.temperament} />
+                      <EntryPhoto kind="disease" id={d.id} temperament={d.temperament} wiki={diseaseWikiTitle(d.name)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 flex-wrap">

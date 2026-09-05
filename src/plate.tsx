@@ -4,6 +4,7 @@
 import { useId, useMemo, useState } from "react";
 import { TEMPERAMENTS } from "./data";
 import { entryPhoto } from "./entryImages";
+import { useWikiPhoto } from "./wikiPhotos";
 
 export type ArtKind = "herb" | "food" | "compound" | "disease" | "mizaj";
 
@@ -381,6 +382,7 @@ export function EntryPhoto({
   hint = "",
   caption,
   tint,
+  wiki,
   className = "",
 }: {
   kind: ArtKind;
@@ -389,24 +391,46 @@ export function EntryPhoto({
   hint?: string;
   caption?: string;
   tint?: string;
+  wiki?: string | null;
   className?: string;
 }) {
   const [err, setErr] = useState(false);
-  const src = useMemo(() => entryPhoto(kind, hint, id), [kind, hint, id]);
+  const [wikiLoaded, setWikiLoaded] = useState(false);
+  const base = useMemo(() => entryPhoto(kind, hint, id), [kind, hint, id]);
+  const wikiUrl = useWikiPhoto(wiki ?? null);
 
-  if (err || !src) {
-    return <PlateArt kind={kind} id={id} temperament={temperament} caption={caption} className={className} />;
-  }
+  /* اگر عکس دقیقِ همان مدخل از ویکی‌پدیا رسید، روی لایهٔ پایه نمایش می‌دهیم */
+  const showWiki = !!wikiUrl && wikiLoaded;
 
   return (
     <div className={`relative w-full h-full overflow-hidden bg-deep ${className}`}>
-      <img
-        src={src}
-        alt={caption ?? ""}
-        loading="lazy"
-        onError={() => setErr(true)}
-        className="w-full h-full object-cover transition-transform duration-700 ease-out hover:scale-[1.06]"
-      />
+      {/* لایهٔ پایه (دسته‌بندی یا نسخهٔ خطی) */}
+      {base && !err ? (
+        <img
+          src={base}
+          alt=""
+          loading="lazy"
+          onError={() => setErr(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${showWiki ? "opacity-0" : "opacity-100"}`}
+        />
+      ) : (
+        <div className={`absolute inset-0 transition-opacity duration-700 ${showWiki ? "opacity-0" : "opacity-100"}`}>
+          <PlateArt kind={kind} id={id} temperament={temperament} />
+        </div>
+      )}
+
+      {/* عکس واقعیِ خود مدخل */}
+      {wikiUrl && (
+        <img
+          src={wikiUrl}
+          alt={caption ?? ""}
+          loading="lazy"
+          onLoad={() => setWikiLoaded(true)}
+          onError={() => setWikiLoaded(false)}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out hover:scale-[1.06] ${showWiki ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
+
       {/* سایهٔ خوانایی و لایهٔ رنگ مزاج */}
       <span className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,21,34,0.62), rgba(10,21,34,0.05) 55%)" }} />
       {tint && <span className="pointer-events-none absolute inset-0 mix-blend-color" style={{ background: tint }} />}
