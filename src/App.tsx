@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BOOKS, COMPOUNDS, DISEASES, EVENTS, FOODS, HERBS, PRODUCTS } from "./data";
 import { FULL_COURSES } from "./courses";
 import { EXTRA_COMPOUNDS, EXTRA_DISEASES, EXTRA_FOODS, EXTRA_HERBS, LONG_ARTICLES } from "./dataExtra";
+import { EXTRA_HERBS_2 } from "./dataHerbs2";
+import { EXTRA_FOODS_2 } from "./dataFoods2";
+import { EXTRA_COMPOUNDS_2 } from "./dataCompounds2";
+import { EXTRA_DISEASES_2 } from "./dataDiseases2";
+import { EXTRA_DISEASES_3 } from "./dataDiseases3";
 import { BookmarkProvider, Ic, Shamseh, ToastProvider, fa, useMarks, useToast } from "./ui";
 import Home from "./views/Home";
 import Encyclopedia from "./views/Encyclopedia";
@@ -32,10 +37,10 @@ const KINDS = ["همه", "گیاه دارویی", "مفرد غذایی", "دار
 
 function buildIndex(): SearchItem[] {
   return [
-    ...[...HERBS, ...EXTRA_HERBS].map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name })),
-    ...[...FOODS, ...EXTRA_FOODS].map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name })),
-    ...[...COMPOUNDS, ...EXTRA_COMPOUNDS].map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name })),
-    ...[...DISEASES, ...EXTRA_DISEASES].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
+    ...[...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2].map((h) => ({ id: h.id, title: h.name, sub: h.latin, view: "encyclopedia" as ViewId, kind: "گیاه دارویی", q: h.name })),
+    ...[...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2].map((f) => ({ id: f.id, title: f.name, sub: f.cat, view: "encyclopedia" as ViewId, kind: "مفرد غذایی", q: f.name })),
+    ...[...COMPOUNDS, ...EXTRA_COMPOUNDS, ...EXTRA_COMPOUNDS_2].map((c) => ({ id: c.id, title: c.name, sub: c.kind, view: "encyclopedia" as ViewId, kind: "داروی مرکب", q: c.name })),
+    ...[...DISEASES, ...EXTRA_DISEASES, ...EXTRA_DISEASES_2, ...EXTRA_DISEASES_3].map((d) => ({ id: d.id, title: d.name, sub: "دیدگاه طب سنتی", view: "encyclopedia" as ViewId, kind: "بیماری", q: d.name })),
     ...LONG_ARTICLES.map((a) => ({ id: a.id, title: a.title, sub: a.cat, view: "journal" as ViewId, kind: "مقاله" })),
     ...BOOKS.map((b) => ({ id: b.id, title: `«${b.title}»`, sub: b.author, view: "library" as ViewId, kind: "کتاب", q: b.title })),
     ...FULL_COURSES.map((c) => ({ id: c.id, title: c.title, sub: `دورهٔ باز • ${fa(c.lessons.length)} درس • ${fa(c.hours)} ساعت`, view: "academy" as ViewId, kind: "دوره" })),

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   COMPOUNDS,
   DISEASES,
@@ -8,12 +8,17 @@ import {
 } from "../data";
 import type { Compound, Disease, Food, Herb, TemperamentId } from "../data";
 import { EXTRA_COMPOUNDS, EXTRA_DISEASES, EXTRA_FOODS, EXTRA_HERBS, FOOD_DETAILS, HERB_DETAILS, MIZAJ_GUIDE } from "../dataExtra";
+import { EXTRA_HERBS_2 } from "../dataHerbs2";
+import { EXTRA_FOODS_2 } from "../dataFoods2";
+import { EXTRA_COMPOUNDS_2 } from "../dataCompounds2";
+import { EXTRA_DISEASES_2 } from "../dataDiseases2";
+import { EXTRA_DISEASES_3 } from "../dataDiseases3";
 import { Ic, MarkButton, Reveal, SectionHead, Stars, TemperChip, fa } from "../ui";
 
-const ALL_HERBS = [...HERBS, ...EXTRA_HERBS];
-const ALL_FOODS = [...FOODS, ...EXTRA_FOODS];
-const ALL_COMPOUNDS = [...COMPOUNDS, ...EXTRA_COMPOUNDS];
-const ALL_DISEASES = [...DISEASES, ...EXTRA_DISEASES];
+const ALL_HERBS = [...HERBS, ...EXTRA_HERBS, ...EXTRA_HERBS_2];
+const ALL_FOODS = [...FOODS, ...EXTRA_FOODS, ...EXTRA_FOODS_2];
+const ALL_COMPOUNDS = [...COMPOUNDS, ...EXTRA_COMPOUNDS, ...EXTRA_COMPOUNDS_2];
+const ALL_DISEASES = [...DISEASES, ...EXTRA_DISEASES, ...EXTRA_DISEASES_2, ...EXTRA_DISEASES_3];
 
 type Tab = "herbs" | "foods" | "compounds" | "diseases" | "mizaj";
 
@@ -84,6 +89,11 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
   const [q, setQ] = useState(initialQuery);
   const [temper, setTemper] = useState<TemperamentId | "all">("all");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [visible, setVisible] = useState(18);
+
+  useEffect(() => {
+    setVisible(18);
+  }, [tab, q, temper]);
 
   const norm = (s: string) => s.replace(/ي/g, "ی").replace(/ك/g, "ک").trim().toLowerCase();
 
@@ -279,7 +289,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
           ))}
 
         {tab === "herbs" &&
-          (results as Herb[]).map((h, i) => (
+          (results as Herb[]).slice(0, visible).map((h, i) => (
             <Reveal key={h.id} delay={Math.min(i * 60, 240)}>
               <ExpandShell
                 id={h.id}
@@ -369,7 +379,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
 
         {tab === "foods" && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(results as Food[]).map((f, i) => (
+            {(results as Food[]).slice(0, visible).map((f, i) => (
               <Reveal key={f.id} delay={Math.min(i * 60, 240)}>
                 <ExpandShell
                   id={f.id}
@@ -408,7 +418,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
 
         {tab === "compounds" && (
           <div className="grid md:grid-cols-2 gap-4">
-            {(results as Compound[]).map((c, i) => (
+            {(results as Compound[]).slice(0, visible).map((c, i) => (
               <Reveal key={c.id} delay={Math.min(i * 60, 240)}>
                 <ExpandShell
                   id={c.id}
@@ -446,7 +456,7 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
         )}
 
         {tab === "diseases" &&
-          (results as Disease[]).map((d, i) => (
+          (results as Disease[]).slice(0, visible).map((d, i) => (
             <Reveal key={d.id} delay={Math.min(i * 60, 240)}>
               <ExpandShell
                 id={d.id}
@@ -493,6 +503,19 @@ export default function Encyclopedia({ initialQuery = "" }: { initialQuery?: str
             </Reveal>
           ))}
       </div>
+
+      {/* بارگذاری بیشتر */}
+      {tab !== "mizaj" && results.length > visible && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setVisible((v) => v + 24)}
+            className="group inline-flex items-center gap-3 border border-gold/50 text-gold font-bold px-8 py-3.5 hover:bg-gold hover:text-night transition-all duration-300"
+          >
+            بارگذاری {fa(Math.min(24, results.length - visible))} مدخل دیگر
+            <span className="text-[11px] font-normal opacity-75">({fa(results.length - visible)} مدخل باقی‌مانده)</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
