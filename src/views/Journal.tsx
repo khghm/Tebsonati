@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IMG } from "../data";
-import { LONG_ARTICLES } from "../dataExtra";
+import { ALL_JOURNAL_ARTICLES } from "../journalArticles";
 import type { LongArticle } from "../dataExtra";
+
+const LONG_ARTICLES = ALL_JOURNAL_ARTICLES;
 import { Ic, MarkButton, Modal, Reveal, SectionHead, fa, useToast } from "../ui";
 
 const CATS = ["همه", "پژوهشی", "آموزشی", "تدابیر فصول", "خبر", "گزارش ویژه"] as const;
@@ -108,7 +110,12 @@ export default function Journal() {
   const [cat, setCat] = useState<(typeof CATS)[number]>("همه");
   const [q, setQ] = useState("");
   const [reading, setReading] = useState<LongArticle | null>(null);
+  const [visible, setVisible] = useState(12);
   const { push } = useToast();
+
+  useEffect(() => {
+    setVisible(12);
+  }, [cat, q]);
 
   const openRelated = (a: LongArticle) => {
     setReading(a);
@@ -139,8 +146,17 @@ export default function Journal() {
         <SectionHead
           kicker="مجلهٔ علمی-پژوهشی"
           title="مجلهٔ دانشنامه؛ از پژوهش تا تدبیر"
-          desc="گزارش‌های بلند و مستند: بازخوانی کتب مرجع، مرور شواهد نوین، تدابیر فصول و اخبار حوزهٔ طب ایرانی."
+          desc="بیش از صد گزارش بلند و مستند در مزاج‌شناسی و درمان بیماری‌ها: بازخوانی کتب مرجع، مرور شواهد نوین، تدابیر فصول و اخبار حوزهٔ طب ایرانی."
         />
+      </Reveal>
+
+      <Reveal delay={90}>
+        <div className="mt-5 flex items-center gap-3 text-[12px] text-faint">
+          <span className="w-8 h-[2px] bg-gradient-to-l from-gold to-transparent" />
+          <span>{fa(list.length)} مقاله در این نمایه</span>
+          <span>•</span>
+          <span>جست‌وجو در متن کامل مقالات</span>
+        </div>
       </Reveal>
 
       <Reveal delay={120}>
@@ -207,7 +223,7 @@ export default function Journal() {
       )}
 
       <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {rest.map((a, i) => (
+        {rest.slice(0, visible).map((a, i) => (
           <Reveal key={a.id} delay={Math.min(i * 70, 280)}>
             <article className="card-lift frame h-full border border-edge bg-deep p-5 flex flex-col">
               <div className="flex items-center justify-between">
@@ -232,6 +248,18 @@ export default function Journal() {
           </Reveal>
         ))}
       </div>
+
+      {visible < rest.length && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setVisible((v) => v + 24)}
+            className="inline-flex items-center gap-2.5 border border-gold/50 text-gold px-7 py-3 text-sm font-semibold hover:bg-gold hover:text-night transition-all duration-300"
+          >
+            بارگذاری مقالات بیشتر
+            <span className="text-[11px] opacity-70">({fa(rest.length - visible)} مقالهٔ دیگر)</span>
+          </button>
+        </div>
+      )}
 
       <Modal open={!!reading} onClose={() => setReading(null)} title={reading?.title ?? ""} wide>
         {reading && (
