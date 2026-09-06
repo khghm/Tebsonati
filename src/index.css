@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+@theme {
+  --color-night: #0a1522;
+  --color-deep: #0e1d2e;
+  --color-pane: #13263a;
+  --color-pane2: #17304a;
+  --color-edge: #24405c;
+  --color-ivory: #f0e8d8;
+  --color-dim: #9db1c4;
+  --color-faint: #6c8299;
+  --color-gold: #e3b558;
+  --color-goldsoft: #f2d592;
+  --color-teal: #3fc8b8;
+  --color-tealdeep: #1f7d74;
+  --color-madder: #d8604a;
+  --color-lapis: #2b5f9e;
+
+  --font-display: "Lalezar", "Vazirmatn", serif;
+  --font-body: "Vazirmatn", "Segoe UI", sans-serif;
+  --font-nasta: "Gulzar", "Vazirmatn", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-night);
+  color: var(--color-ivory);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(227, 181, 88, 0.35);
+  color: #fff8e8;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a1522;
+}
+::-webkit-scrollbar-thumb {
+  background: #24405c;
+  border-radius: 8px;
+  border: 2px solid #0a1522;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e3b558;
+}
+
+/* ---------- ambient layered background ---------- */
+.bg-girih {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23e3b558' stroke-opacity='0.055'%3E%3Crect x='26' y='26' width='44' height='44'/%3E%3Crect x='26' y='26' width='44' height='44' transform='rotate(45 48 48)'/%3E%3Ccircle cx='48' cy='48' r='5'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+}
+
+.bg-glow {
+  background:
+    radial-gradient(900px 500px at 85% -5%, rgba(63, 200, 184, 0.13), transparent 60%),
+    radial-gradient(800px 520px at 8% 12%, rgba(227, 181, 88, 0.1), transparent 60%),
+    radial-gradient(700px 600px at 50% 110%, rgba(43, 95, 158, 0.18), transparent 65%);
+}
+
+/* ---------- keyframes ---------- */
+@keyframes tickerMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes kenburns {
+  from { transform: scale(1) translate(0, 0); }
+  to { transform: scale(1.09) translate(1.5%, -1.5%); }
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes pulseRing {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@keyframes dashDraw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+.anim-ticker {
+  animation: tickerMove 46s linear infinite;
+}
+.anim-ticker:hover {
+  animation-play-state: paused;
+}
+.anim-spin-slow {
+  animation: spinSlow 70s linear infinite;
+}
+.wheel-wrap:hover .anim-spin-slow {
+  animation-play-state: paused;
+}
+.anim-float {
+  animation: floatY 7s ease-in-out infinite;
+}
+.kenburns {
+  animation: kenburns 18s ease-in-out infinite alternate;
+}
+.anim-breathe {
+  animation: breathe 5s ease-in-out infinite;
+}
+.toast-in {
+  animation: toastIn 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* ---------- scroll reveal ---------- */
+.rv {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.75s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--rvd, 0ms);
+}
+.rv.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- decorative corner frame ---------- */
+.frame {
+  position: relative;
+}
+.frame::before,
+.frame::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: rgba(227, 181, 88, 0.55);
+  border-style: solid;
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+.frame::before {
+  top: -1px;
+  right: -1px;
+  border-width: 2px 2px 0 0;
+}
+.frame::after {
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 2px 2px;
+}
+.frame:hover::before,
+.frame:hover::after {
+  width: 34px;
+  height: 34px;
+  border-color: rgba(227, 181, 88, 0.95);
+}
+
+/* ---------- nav underline ---------- */
+.navlink {
+  position: relative;
+  transition: color 0.3s ease;
+}
+.navlink::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, #e3b558, #3fc8b8);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+  border-radius: 2px;
+}
+.navlink:hover::after,
+.navlink.active::after {
+  transform: scaleX(1);
+}
+
+/* ---------- misc ---------- */
+.divider-orn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(227, 181, 88, 0.7);
+}
+.divider-orn::before,
+.divider-orn::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(227, 181, 88, 0.4), transparent);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.card-lift {
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), border-color 0.45s, box-shadow 0.45s, background-color 0.45s;
+}
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 44px -18px rgba(4, 10, 18, 0.85), 0 0 0 1px rgba(227, 181, 88, 0.22);
+}
+
+input[type="range"] {
+  accent-color: #e3b558;
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .anim-ticker,
+  .anim-spin-slow,
+  .anim-float,
+  .kenburns,
+  .anim-breathe {
+    animation: none !important;
+  }
+  .rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .card-lift,
+  .card-lift:hover {
+    transition: none;
+    transform: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
